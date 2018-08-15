@@ -14,12 +14,15 @@ public class Dragon : MonoBehaviour
     float attackTimer = 2f;
     public GameObject projectile;
     public float thrustPower;
+    float changeTimer = 0.2f;
+    bool shouldChange;
 
     void Start()
     {
         animator = GetComponent<Animator>();
         direction = Random.Range(0, 3);
         canAttack = false;
+        shouldChange = false;
     }
 
 
@@ -40,6 +43,15 @@ public class Dragon : MonoBehaviour
             canAttack = true;
         }
         Attack();
+        if (shouldChange)
+        {
+            changeTimer -= Time.deltaTime;
+            if (changeTimer <= 0)
+            {
+                shouldChange = false;
+                changeTimer = 0.2f;
+            }
+        }
     }
 
     void Movement()
@@ -73,6 +85,7 @@ public class Dragon : MonoBehaviour
             health--;
             other.gameObject.GetComponent<Sword>().CreateParticle();
             GameObject.FindGameObjectWithTag("Player").GetComponent<Player>().canAttack = true;
+            GameObject.FindGameObjectWithTag("Player").GetComponent<Player>().canMove = true;
             Destroy(other.gameObject);
             if (health <= 0)
             {
@@ -100,7 +113,28 @@ public class Dragon : MonoBehaviour
         }
         if (other.gameObject.tag == "Wall")
         {
-            direction = Random.Range(0, 3);
+            if (shouldChange)
+            {
+                return;
+            }
+
+            if (direction == 0)
+            {
+                direction = 2;
+            }
+            else if (direction == 1)
+            {
+                direction = 3;
+            }
+            else if (direction == 2)
+            {
+                direction = 0;
+            }
+            else if (direction == 3)
+            {
+                direction = 1;
+            }
+            shouldChange = true;
         }
     }
 

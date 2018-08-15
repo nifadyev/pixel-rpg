@@ -126,6 +126,7 @@ public class Player : MonoBehaviour
         }
         canMove = false;
         canAttack = false;
+        thrustPower = 250;
         GameObject newSword = Instantiate(sword, transform.position, transform.rotation);
         if (currentHealth == maxHealth)
         {
@@ -173,6 +174,17 @@ public class Player : MonoBehaviour
             }
             other.gameObject.GetComponent<Bullet>().CreateParticle();
             Destroy(other.gameObject);
+        }
+        if (other.gameObject.tag == "Potion")
+        {
+            currentHealth = maxHealth;
+            Destroy(other.gameObject);
+            if (maxHealth >= 5)
+            {
+                return;
+            }
+            maxHealth++;
+            currentHealth = maxHealth;
         }
     }
 }

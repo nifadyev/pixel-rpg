@@ -5,7 +5,7 @@ using UnityEngine;
 public class Crab : MonoBehaviour
 {
     int direction;
-    float timer = 1.5f;
+    float timer = 1f;
     public int health;
     public float speed;
     public GameObject particleEffect;
@@ -14,12 +14,15 @@ public class Crab : MonoBehaviour
     public Sprite facingDown;
     public Sprite facingRight;
     public Sprite facingLeft;
+    float changeTimer = 0.2f;
+    bool shouldChange;
 
     // Use this for initialization
     void Start()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
         direction = Random.Range(0, 3);
+        shouldChange = false;
     }
 
     // Update is called once per frame
@@ -32,6 +35,16 @@ public class Crab : MonoBehaviour
             direction = Random.Range(0, 3);
         }
         Movement();
+
+        if (shouldChange)
+        {
+            changeTimer -= Time.deltaTime;
+            if (changeTimer <= 0)
+            {
+                shouldChange = false;
+                changeTimer = 0.2f;
+            }
+        }
     }
 
     void OnTriggerEnter2D(Collider2D other)
@@ -68,7 +81,28 @@ public class Crab : MonoBehaviour
         }
         if (other.gameObject.tag == "Wall")
         {
-            direction = Random.Range(0, 3);
+            if (shouldChange)
+            {
+                return;
+            }
+
+            if (direction == 0)
+            {
+                direction = 3;
+            }
+            else if (direction == 1)
+            {
+                direction = 2;
+            }
+            else if (direction == 2)
+            {
+                direction = 1;
+            }
+            else if (direction == 3)
+            {
+                direction = 0;
+            }
+            shouldChange = true;
         }
     }
 
