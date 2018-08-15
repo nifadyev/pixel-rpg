@@ -38,4 +38,9 @@ public class Sword : MonoBehaviour
             Destroy(gameObject);
         }
     }
+
+    public void CreateParticle()
+    {
+        Instantiate(swordParticle, transform.position, transform.rotation);
+    }
 }

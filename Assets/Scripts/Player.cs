@@ -9,11 +9,14 @@ public class Player : MonoBehaviour
     Animator animator;
     public Image[] hearts;
     public int maxHealth;
-    int currentHealth;
+    public int currentHealth;
     public GameObject sword;
     public float thrustPower;
     public bool canMove;
     public bool canAttack;
+    public bool iniFrames; // Invincibility - мигание при получении урона
+    SpriteRenderer spriteRenderer;
+    float iniTimer = 1f;
 
     void Start()
     {
@@ -22,6 +25,8 @@ public class Player : MonoBehaviour
         GetHealth();
         canMove = true;
         canAttack = true;
+        iniFrames = false;
+        spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
     void Update()
@@ -35,6 +40,25 @@ public class Player : MonoBehaviour
         if (currentHealth > maxHealth)
         {
             currentHealth = maxHealth;
+        }
+        if (iniFrames)
+        {
+            iniTimer -= Time.deltaTime;
+            int rn = Random.Range(0, 100);
+            if (rn < 50)
+            {
+                spriteRenderer.enabled = false;
+            }
+            else if (rn > 50)
+            {
+                spriteRenderer.enabled = true;
+            }
+            if (iniTimer <= 0)
+            {
+                iniTimer = 1f;
+                iniFrames = false;
+                spriteRenderer.enabled = true;
+            }
         }
         GetHealth();
     }
@@ -136,5 +160,19 @@ public class Player : MonoBehaviour
         #endregion
 
 
+    }
+
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.gameObject.tag == "EnemyBullet")
+        {
+            if (!iniFrames)
+            {
+                iniFrames = true;
+                currentHealth--;
+            }
+            other.gameObject.GetComponent<Bullet>().CreateParticle();
+            Destroy(other.gameObject);
+        }
     }
 }
