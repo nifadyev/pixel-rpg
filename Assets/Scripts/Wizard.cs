@@ -4,21 +4,22 @@ using UnityEngine;
 
 public class Wizard : MonoBehaviour
 {
-    Animator animator;
     public float speed;
+    public float thrustPower;
     public int direction;
-    float directionTimer = 1.2f;
     public int health;
     public GameObject deathParticle;
-    bool canAttack;
-    float attackTimer = 2f;
-    public GameObject projectile;
-    public float thrustPower;
-    float changeTimer = 0.2f;
-    bool shouldChange;
-    float specialTimer = 0.5f;
-    public Transform rewardPosition;
     public GameObject potion;
+    public GameObject projectile;
+    public Transform rewardPosition;
+
+    Animator animator;
+    float directionTimer = 1.2f;
+    float attackTimer = 2f;
+    float changeTimer = 0.2f;
+    float specialTimer = 0.5f;
+    bool canAttack;
+    bool shouldChange;
 
     void Start()
     {
@@ -26,7 +27,6 @@ public class Wizard : MonoBehaviour
         canAttack = false;
         shouldChange = false;
     }
-
 
     void Update()
     {
@@ -37,6 +37,7 @@ public class Wizard : MonoBehaviour
             SpecialAttack();
             specialTimer = 0.5f;
         }
+
         directionTimer -= Time.deltaTime;
         if (directionTimer <= 0)
         {
@@ -61,14 +62,15 @@ public class Wizard : MonoBehaviour
             }
         }
         Movement();
-
         attackTimer -= Time.deltaTime;
         if (attackTimer <= 0)
         {
             attackTimer = 2f;
             canAttack = true;
         }
+
         Attack();
+
         if (shouldChange)
         {
             changeTimer -= Time.deltaTime;
@@ -82,25 +84,22 @@ public class Wizard : MonoBehaviour
 
     void Movement()
     {
+        animator.SetInteger("Direction", direction);
         if (direction == 0)
         {
             transform.Translate(0, speed * Time.deltaTime, 0);
-            animator.SetInteger("Direction", direction);
         }
         else if (direction == 1)
         {
             transform.Translate(-speed * Time.deltaTime, 0, 0);
-            animator.SetInteger("Direction", direction);
         }
         else if (direction == 2)
         {
             transform.Translate(0, -speed * Time.deltaTime, 0);
-            animator.SetInteger("Direction", direction);
         }
         else if (direction == 3)
         {
             transform.Translate(speed * Time.deltaTime, 0, 0);
-            animator.SetInteger("Direction", direction);
         }
     }
 
@@ -108,11 +107,12 @@ public class Wizard : MonoBehaviour
     {
         if (other.gameObject.tag == "Sword")
         {
-            //health--;
+            health--;
             other.gameObject.GetComponent<Sword>().CreateParticle();
             GameObject.FindGameObjectWithTag("Player").GetComponent<Player>().canAttack = true;
             GameObject.FindGameObjectWithTag("Player").GetComponent<Player>().canMove = true;
             Destroy(other.gameObject);
+
             if (health <= 0)
             {
                 Instantiate(deathParticle, transform.position, transform.rotation);
@@ -126,18 +126,19 @@ public class Wizard : MonoBehaviour
     {
         if (other.gameObject.tag == "Player")
         {
-            health--;
             if (!other.gameObject.GetComponent<Player>().iniFrames)
             {
                 other.gameObject.GetComponent<Player>().currentHealth--;
                 other.gameObject.GetComponent<Player>().iniFrames = true;
             }
+
             if (health <= 0)
             {
                 Instantiate(deathParticle, transform.position, transform.rotation);
                 Destroy(gameObject);
             }
         }
+
         if (other.gameObject.tag == "Wall")
         {
             if (shouldChange)
@@ -171,27 +172,24 @@ public class Wizard : MonoBehaviour
         {
             return;
         }
-        canAttack = false;
 
-        if (direction == 0)
+        canAttack = false;
+        GameObject newProjectile = Instantiate(projectile, transform.position, transform.rotation) as GameObject;
+
+        switch (direction)
         {
-            GameObject newProjectile = Instantiate(projectile, transform.position, transform.rotation) as GameObject;
-            newProjectile.GetComponent<Rigidbody2D>().AddForce(Vector2.up * thrustPower);
-        }
-        else if (direction == 1)
-        {
-            GameObject newProjectile = Instantiate(projectile, transform.position, transform.rotation) as GameObject;
-            newProjectile.GetComponent<Rigidbody2D>().AddForce(Vector2.left * thrustPower);
-        }
-        else if (direction == 2)
-        {
-            GameObject newProjectile = Instantiate(projectile, transform.position, transform.rotation) as GameObject;
-            newProjectile.GetComponent<Rigidbody2D>().AddForce(Vector2.down * thrustPower);
-        }
-        else if (direction == 3)
-        {
-            GameObject newProjectile = Instantiate(projectile, transform.position, transform.rotation) as GameObject;
-            newProjectile.GetComponent<Rigidbody2D>().AddForce(Vector2.right * thrustPower);
+            case 0:
+                newProjectile.GetComponent<Rigidbody2D>().AddForce(Vector2.up * thrustPower);
+                break;
+            case 1:
+                newProjectile.GetComponent<Rigidbody2D>().AddForce(Vector2.left * thrustPower);
+                break;
+            case 2:
+                newProjectile.GetComponent<Rigidbody2D>().AddForce(Vector2.down * thrustPower);
+                break;
+            case 3:
+                newProjectile.GetComponent<Rigidbody2D>().AddForce(Vector2.right * thrustPower);
+                break;
         }
     }
 

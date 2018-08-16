@@ -4,17 +4,18 @@ using UnityEngine;
 
 public class Dragon : MonoBehaviour
 {
-    Animator animator;
     public float speed;
-    int direction;
-    float directionTimer = 0.7f;
+    public float thrustPower;
     public int health;
     public GameObject deathParticle;
-    bool canAttack;
-    float attackTimer = 2f;
     public GameObject projectile;
-    public float thrustPower;
+
+    Animator animator;
+    float directionTimer = 0.7f;
+    float attackTimer = 2f;
     float changeTimer = 0.2f;
+    int direction;
+    bool canAttack;
     bool shouldChange;
 
     void Start()
@@ -25,7 +26,6 @@ public class Dragon : MonoBehaviour
         shouldChange = false;
     }
 
-
     void Update()
     {
         directionTimer -= Time.deltaTime;
@@ -34,6 +34,7 @@ public class Dragon : MonoBehaviour
             directionTimer = 0.7f;
             direction = Random.Range(0, 3);
         }
+
         Movement();
 
         attackTimer -= Time.deltaTime;
@@ -42,7 +43,9 @@ public class Dragon : MonoBehaviour
             attackTimer = 2f;
             canAttack = true;
         }
+
         Attack();
+
         if (shouldChange)
         {
             changeTimer -= Time.deltaTime;
@@ -56,25 +59,22 @@ public class Dragon : MonoBehaviour
 
     void Movement()
     {
+        animator.SetInteger("Direction", direction);
         if (direction == 0)
         {
             transform.Translate(0, speed * Time.deltaTime, 0);
-            animator.SetInteger("Direction", direction);
         }
         else if (direction == 1)
         {
             transform.Translate(-speed * Time.deltaTime, 0, 0);
-            animator.SetInteger("Direction", direction);
         }
         else if (direction == 2)
         {
             transform.Translate(0, -speed * Time.deltaTime, 0);
-            animator.SetInteger("Direction", direction);
         }
         else if (direction == 3)
         {
             transform.Translate(speed * Time.deltaTime, 0, 0);
-            animator.SetInteger("Direction", direction);
         }
     }
 
@@ -87,6 +87,7 @@ public class Dragon : MonoBehaviour
             GameObject.FindGameObjectWithTag("Player").GetComponent<Player>().canAttack = true;
             GameObject.FindGameObjectWithTag("Player").GetComponent<Player>().canMove = true;
             Destroy(other.gameObject);
+
             if (health <= 0)
             {
                 Instantiate(deathParticle, transform.position, transform.rotation);
@@ -105,12 +106,14 @@ public class Dragon : MonoBehaviour
                 other.gameObject.GetComponent<Player>().currentHealth--;
                 other.gameObject.GetComponent<Player>().iniFrames = true;
             }
+
             if (health <= 0)
             {
                 Instantiate(deathParticle, transform.position, transform.rotation);
                 Destroy(gameObject);
             }
         }
+
         if (other.gameObject.tag == "Wall")
         {
             if (shouldChange)
@@ -144,26 +147,24 @@ public class Dragon : MonoBehaviour
         {
             return;
         }
+
         canAttack = false;
+        GameObject newProjectile = Instantiate(projectile, transform.position, transform.rotation) as GameObject;
 
         if (direction == 0)
         {
-            GameObject newProjectile = Instantiate(projectile, transform.position, transform.rotation) as GameObject;
             newProjectile.GetComponent<Rigidbody2D>().AddForce(Vector2.up * thrustPower);
         }
         else if (direction == 1)
         {
-            GameObject newProjectile = Instantiate(projectile, transform.position, transform.rotation) as GameObject;
             newProjectile.GetComponent<Rigidbody2D>().AddForce(Vector2.left * thrustPower);
         }
         else if (direction == 2)
         {
-            GameObject newProjectile = Instantiate(projectile, transform.position, transform.rotation) as GameObject;
             newProjectile.GetComponent<Rigidbody2D>().AddForce(Vector2.down * thrustPower);
         }
         else if (direction == 3)
         {
-            GameObject newProjectile = Instantiate(projectile, transform.position, transform.rotation) as GameObject;
             newProjectile.GetComponent<Rigidbody2D>().AddForce(Vector2.right * thrustPower);
         }
     }

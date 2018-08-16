@@ -7,18 +7,18 @@ using UnityEngine.SceneManagement;
 public class Player : MonoBehaviour
 {
     public float speed;
-    Animator animator;
-    public Image[] hearts;
+    public float thrustPower;
     public int maxHealth;
     public int currentHealth;
+    public Image[] hearts;
     public GameObject sword;
-    public float thrustPower;
     public bool canMove;
     public bool canAttack;
     public bool iniFrames; // Invincibility - мигание при получении урона
+
+    Animator animator;
     SpriteRenderer spriteRenderer;
     float iniTimer = 1f;
-    // public Camera cam;
 
     void Start()
     {
@@ -30,40 +30,35 @@ public class Player : MonoBehaviour
         {
             currentHealth = maxHealth;
         }
+
         animator = GetComponent<Animator>();
-        
+        spriteRenderer = GetComponent<SpriteRenderer>();
         GetHealth();
         canMove = true;
         canAttack = true;
         iniFrames = false;
-        spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
     void Update()
     {
-        // cam.transform.position = new Vector3(transform.position.x, transform.position.y, transform.position.z - 5);
         Movement();
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
             Attack();
         }
+
         if (currentHealth > maxHealth)
         {
             currentHealth = maxHealth;
         }
+
         if (iniFrames)
         {
-            iniTimer -= Time.deltaTime;
             int rn = Random.Range(0, 100);
-            if (rn < 50)
-            {
-                spriteRenderer.enabled = false;
-            }
-            else if (rn > 50)
-            {
-                spriteRenderer.enabled = true;
-            }
+            spriteRenderer.enabled = (rn < 50) ? false : true;
+
+            iniTimer -= Time.deltaTime;
             if (iniTimer <= 0)
             {
                 iniTimer = 1f;
@@ -71,6 +66,7 @@ public class Player : MonoBehaviour
                 spriteRenderer.enabled = true;
             }
         }
+
         GetHealth();
     }
 
@@ -115,6 +111,7 @@ public class Player : MonoBehaviour
 
     void GetHealth()
     {
+        // Reset hearts before activating
         for (int i = 0; i <= hearts.Length - 1; i++)
         {
             hearts[i].gameObject.SetActive(false);
@@ -124,10 +121,7 @@ public class Player : MonoBehaviour
         {
             hearts[i].gameObject.SetActive(true);
         }
-
     }
-
-    //TODO: Add enum for directions
 
     void Attack()
     {
@@ -135,9 +129,11 @@ public class Player : MonoBehaviour
         {
             return;
         }
+
         canMove = false;
         canAttack = false;
         thrustPower = 250;
+
         GameObject newSword = Instantiate(sword, transform.position, transform.rotation);
         if (currentHealth == maxHealth)
         {
@@ -145,10 +141,10 @@ public class Player : MonoBehaviour
             canMove = true;
             thrustPower = 500;
         }
+
         int swordDirection = animator.GetInteger("Direction");
         animator.SetInteger("AttackingDirection", swordDirection);
         #region //SwordRotation
-
         if (swordDirection == 0)
         {
             newSword.transform.Rotate(0, 0, 0);
@@ -170,16 +166,16 @@ public class Player : MonoBehaviour
             newSword.GetComponent<Rigidbody2D>().AddForce(Vector2.right * thrustPower);
         }
         #endregion
-
-
     }
 
     void OnTriggerEnter2D(Collider2D other)
     {
+        // Restart the game
         if (currentHealth <= 0)
         {
             SceneManager.LoadScene(0);
         }
+
         if (other.gameObject.tag == "EnemyBullet")
         {
             if (!iniFrames)
@@ -194,6 +190,7 @@ public class Player : MonoBehaviour
         {
             currentHealth = maxHealth;
             Destroy(other.gameObject);
+            // Restrict to increase health more than 5
             if (maxHealth >= 5)
             {
                 return;
