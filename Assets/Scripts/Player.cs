@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class Player : MonoBehaviour
 {
@@ -17,11 +18,20 @@ public class Player : MonoBehaviour
     public bool iniFrames; // Invincibility - мигание при получении урона
     SpriteRenderer spriteRenderer;
     float iniTimer = 1f;
+    // public Camera cam;
 
     void Start()
     {
+        if (PlayerPrefs.HasKey("maxHealth"))
+        {
+            LoadGame();
+        }
+        else
+        {
+            currentHealth = maxHealth;
+        }
         animator = GetComponent<Animator>();
-        currentHealth = maxHealth;
+        
         GetHealth();
         canMove = true;
         canAttack = true;
@@ -31,6 +41,7 @@ public class Player : MonoBehaviour
 
     void Update()
     {
+        // cam.transform.position = new Vector3(transform.position.x, transform.position.y, transform.position.z - 5);
         Movement();
 
         if (Input.GetKeyDown(KeyCode.Space))
@@ -165,6 +176,10 @@ public class Player : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D other)
     {
+        if (currentHealth <= 0)
+        {
+            SceneManager.LoadScene(0);
+        }
         if (other.gameObject.tag == "EnemyBullet")
         {
             if (!iniFrames)
@@ -186,5 +201,17 @@ public class Player : MonoBehaviour
             maxHealth++;
             currentHealth = maxHealth;
         }
+    }
+
+    public void SaveGame()
+    {
+        PlayerPrefs.SetInt("maxHealth", currentHealth);
+        PlayerPrefs.SetInt("currentHealth", currentHealth);
+    }
+
+    void LoadGame()
+    {
+        maxHealth = PlayerPrefs.GetInt("maxHealth");
+        currentHealth = PlayerPrefs.GetInt("currentHealth");
     }
 }
